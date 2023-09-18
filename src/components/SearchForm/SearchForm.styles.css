@@ -1,0 +1,116 @@
+.search {
+  display: flex;
+  max-width: 1280px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 70px 70px 0;
+}
+
+.search__container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 72px;
+  max-width: 1140px;
+  width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 46px;
+}
+
+.search__form {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-stroke-3);
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+  padding-bottom: 11px;
+}
+
+.search__input:focus-within {
+  box-shadow: 0 0 10px var(--color-back-main);
+}
+
+.search__input {
+  outline: none;
+  border: none;
+  border-radius: 10px;
+  background-color: transparent;
+  width: 90%;
+  box-sizing: border-box;
+  font-size: 28px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--color-font-main);
+}
+
+.search__error {
+  position: absolute;
+  top: 70px;
+  left: 0;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 400;
+  color: var(--color-font-main-3);
+}
+
+.search__button {
+  border: none;
+  border-radius: 50%;
+  background: no-repeat url('../../images/search-button.svg')
+    var(--color-font-main-2) center;
+  height: 34px;
+  width: 34px;
+  box-sizing: border-box;
+  padding: 0;
+  cursor: pointer;
+  transition: box-shadow 0.1s ease-in-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.search__button:hover {
+  box-shadow: 0 0 10px var(--color-font-main);
+}
+
+@media screen and (max-width: 769px) {
+  .search {
+    padding-top: 80px;
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+  .search__form {
+    margin-right: 0;
+    margin-bottom: 13px;
+  }
+
+  .search__container::after {
+    top: 181px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .search {
+    padding-top: 78px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .search__form {
+    margin-bottom: 21px;
+    padding-top: 6px;
+    padding-bottom: 9px;
+  }
+
+  .search__input {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  .search__error {
+    font-size: 10px;
+  }
+}
