@@ -34,7 +34,7 @@
   text-shadow: 0 0 10px var(--color-back-main);
 }
 
-.navigation__link_active {
+.navigation__item_active {
   font-weight: 500;
 }
 
@@ -182,7 +182,7 @@
     font-weight: 500;
   }
 
-  .navigation__link_active:not(.navigation__link_type_account):after {
+  .navigation__item_active:not(.navigation__link_type_account):after {
     content: '';
     border-bottom: 2px solid var(--color-font-main);
     width: 100%;
@@ -256,7 +256,7 @@
     width: 22px;
   }
 
-  .navigation__link_active:not(.navigation__link_type_account):after {
+  .navigation__item_active:not(.navigation__link_type_account):after {
     top: 7px;
   }
 }

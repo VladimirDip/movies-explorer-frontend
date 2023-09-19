@@ -40,6 +40,7 @@ const Login = () => {
               value={values.email || ''}
               type="email"
               required
+              placeholder="E-mail"
             />
             <span className="login__error"></span>
           </label>
@@ -52,6 +53,7 @@ const Login = () => {
               value={values.password || ''}
               type="password"
               required
+              placeholder="Пароль"
             />
             <span className="login__error"></span>
           </label>

@@ -6,6 +6,7 @@ const FilterCheckbox = () => {
       <input
         className="filter__checkbox"
         type="checkbox"
+        placeholder="Тумблер короткометражки"
         // onChange={} TODO
         // checked={}
       />

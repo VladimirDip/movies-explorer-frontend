@@ -24,7 +24,7 @@ const Navigation = ({ isLoggedIn, isAccordionOpen, onClickAccordion }) => {
               </li>
             )}
             {/* TODO Remove hardcode active class*/}
-            <li className="navigation__item navigation__link_active">
+            <li className="navigation__item navigation__item_active">
               <NavLink className="navigation__link" to="/movies">
                 Фильмы
               </NavLink>

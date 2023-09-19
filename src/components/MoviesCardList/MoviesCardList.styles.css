@@ -23,7 +23,8 @@
 .movies-card-list__load-more {
   border-radius: 5px;
   margin-top: 50px;
-  width: 320px;
+  /*width: 320px;*/
+  width: calc(240px + 80 * ((100vw - 320px) / 1280));
   height: 36px;
   padding: 10px 0;
   font-size: 12px;

@@ -89,7 +89,7 @@
 
   .techs__stack-list {
     grid-template-columns: repeat(auto-fill, 84px);
-    margin-top: 83px;
+    margin-top: 50px;
     max-width: 648px;
   }
 

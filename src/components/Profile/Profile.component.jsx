@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { CurrentUserContext } from '../../contexts/CurrentUserContext';
 import './Profile.styles.css';
+import { Link } from 'react-router-dom';
 
 const Profile = () => {
   const [values, setValues] = useState({});
@@ -35,6 +36,7 @@ const Profile = () => {
               value={values.name ?? ''}
               required
               onChange={handleChange}
+              placeholder="Имя"
             />
           </label>
           {/* TODO Errors */}
@@ -50,6 +52,7 @@ const Profile = () => {
               value={values.email ?? ''}
               required
               onChange={handleChange}
+              placeholder="E - mail"
             />
           </label>
           {/* TODO Errors */}
@@ -62,11 +65,13 @@ const Profile = () => {
         <button type="submit" className="profile__button-edit">
           Редактировать
         </button>
-        <button // TODO onClick
+        <button // TODO onClick refactoring for logic
           type="submit"
           className="profile__button-exit"
         >
-          Выйти из аккаунта
+          <Link to={'/'} className="profile__buttons-link">
+            Выйти из аккаунта
+          </Link>
         </button>
       </div>
     </main>

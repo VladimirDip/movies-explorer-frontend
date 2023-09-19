@@ -1,4 +1,5 @@
 import landingLogo from '../../images/landing-logo.svg';
+import { HashLink } from 'react-router-hash-link';
 import './Promo.styles.css';
 
 const Promo = () => {
@@ -12,15 +13,13 @@ const Promo = () => {
           <p className="promo__description">
             Листайте ниже, чтобы узнать больше про этот проект и его создателя.
           </p>
-          <a
+          <HashLink
+            smooth
+            to="#aboutProject"
             className="promo__learn-more-link"
-            href="https://practicum.yandex.ru/web/"
-            target="_blank"
-            rel="noreferrer"
-            title="Курс Веб‑разработчик"
           >
             Узнать больше
-          </a>
+          </HashLink>
         </div>
         <img
           src={landingLogo}

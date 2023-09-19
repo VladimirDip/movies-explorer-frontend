@@ -43,6 +43,7 @@ const Register = () => {
               required
               minLength="2"
               maxLength="30"
+              placeholder="Имя"
             />
             <span className="register__error">все не так</span>
           </label>
@@ -55,6 +56,7 @@ const Register = () => {
               value={values.email || ''}
               type="email"
               required
+              placeholder="E-mail"
             />
             <span className="register__error">и тут не так</span>
           </label>
@@ -67,6 +69,7 @@ const Register = () => {
               value={values.password || ''}
               type="password"
               required
+              placeholder="Пароль"
             />
             {/* TODO remove hardcode errors */}
             <span className="register__error">Что-то пошло не так...</span>
