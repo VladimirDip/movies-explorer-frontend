@@ -5,7 +5,7 @@ import logo from '../../images/logo.svg';
 
 import './Register.styles.css';
 
-const Register = () => {
+const Register = ({ onRegister }) => {
   const [isValid, setIsValid] = useState(true); // TODO validation
   const [values, setValues] = useState({});
 
@@ -15,6 +15,11 @@ const Register = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onRegister(values.name, values.email, values.password);
   };
 
   return (
@@ -29,7 +34,7 @@ const Register = () => {
         className="register__form"
         name="register"
         noValidate
-        // onSubmit={} TODO
+        onSubmit={handleSubmit}
       >
         <div className="register__labels-container">
           <label className="register__label">
@@ -77,7 +82,12 @@ const Register = () => {
         </div>
       </form>
       <div className="register__bottom">
-        <button type="submit" className="register__button" disabled={!isValid}>
+        <button
+          type="submit"
+          form="submit"
+          className="register__button"
+          disabled={!isValid}
+        >
           Зарегистрироваться
         </button>
         <span className="register__assist">

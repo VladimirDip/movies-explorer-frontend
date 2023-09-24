@@ -3,7 +3,7 @@ import { CurrentUserContext } from '../../contexts/CurrentUserContext';
 import './Profile.styles.css';
 import { Link } from 'react-router-dom';
 
-const Profile = () => {
+const Profile = ({ onSignOut }) => {
   const [values, setValues] = useState({});
   const currentUser = useContext(CurrentUserContext);
 
@@ -21,7 +21,7 @@ const Profile = () => {
 
   return (
     <main className="profile">
-      <h1 className="profile__title">{`Привет, ${currentUser.name ?? ''}!`}</h1>
+      <h1 className="profile__title">{`Привет, ${values.name ?? ''}!`}</h1>
       <form // TODO onSubmit
         className="profile__form"
         name="profile"
@@ -69,7 +69,7 @@ const Profile = () => {
           type="submit"
           className="profile__button-exit"
         >
-          <Link to={'/'} className="profile__buttons-link">
+          <Link to={'/'} className="profile__buttons-link" onClick={onSignOut}>
             Выйти из аккаунта
           </Link>
         </button>

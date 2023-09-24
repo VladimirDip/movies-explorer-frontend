@@ -6,37 +6,36 @@ import {
   useLocation,
   useNavigate,
 } from 'react-router-dom';
-import ProtectedRoutes from '../ProtectedRoutes/ProtectedRoutes.component';
-
-import { CurrentUserContext } from '../../contexts/CurrentUserContext';
-
 import Header from '../Header/Header.component';
+
 import Main from '../Main/Main.component';
 import Footer from '../Footer/Footer.component';
-import Preloader from '../Preloader/Preloader.component';
 import Movies from '../Movies/Movies.component';
 import SavedMovies from '../SavedMovies/SavedMovies.component';
 import Profile from '../Profile/Profile.component';
 import Register from '../Register/Register.component';
 import Login from '../Login/Login.component';
 import NotFound from '../NotFound/NotFound.component';
+import ProtectedRoutes from '../ProtectedRoutes/ProtectedRoutes.component';
+
+import { CurrentUserContext } from '../../contexts/CurrentUserContext';
+
+import mainApi from '../../utils/MainApi';
 
 import './App.styles.css';
 
-import MoviesApi from '../../utils/MoviesApi';
-
 const App = () => {
-  const [isloaded, setIsLoaded] = useState(true); // TODO false
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // TODO false
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false); // TODO false
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Auth
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Navbar menu
 
-  const [currentUser, setCurrentUser] = useState({
-    // TODO {}
-    name: 'Владимир',
-    email: 'test@mail.ru',
-  });
+  const [userMovieList, setUserMovieList] = useState([]); // Movies
+  const [updatedUserMovieList, setUpdatedUserMovieList] = useState([]);
 
-  const [movieList, setMovieList] = useState([]);
+  const [currentUser, setCurrentUser] = useState({});
+
+  // const [isShortMovies, setIsShortMovies] = useState(false);
+  // const [movieList, setMovieList] = useState([]);
+  // const [filtredMovieList, setFiltredMovieList] = useState([]);
 
   const headerRoutesArr = ['/', '/movies', '/saved-movies', '/profile'];
   const footerRoutesArr = ['/', '/movies', '/saved-movies'];
@@ -49,47 +48,145 @@ const App = () => {
   const handleElementRouteCheck = (routesArr) =>
     routesArr.some((route) => route === currentLocation.pathname);
 
+  const handleLoginSubmit = (email, password) =>
+    mainApi
+      .login(email, password)
+      .then((res) => {
+        localStorage.setItem('jwt', res.token);
+        setIsLoggedIn(true);
+        navigate('/movies');
+      })
+      .catch((err) => {
+        console.error(`Пользователь с email не найден : (${err})`);
+      });
+
+  const handleSignOut = () => {
+    localStorage.removeItem('jwt');
+    setIsLoggedIn(false);
+    navigate('/signin');
+  };
+
+  const handleBookmarkMovie = (movie) => {
+    const isSavedMovie = userMovieList.some(
+      (userMovie) => userMovie.movieId === movie.movieId,
+    );
+
+    isSavedMovie
+      ? handleDeleteMovie(movie)
+      : mainApi
+          .addMovie(movie)
+          .then((newMovie) => setUserMovieList([...userMovieList, newMovie]))
+          .catch((err) => console.log(err)); // TODO
+  };
+
   // Temp for get movies
+  const handleDeleteMovie = (movie) => {
+    const savedUserMovie = userMovieList.find(
+      (userMovie) =>
+        userMovie.movieId === movie.id || userMovie.movieId === movie.movieId,
+    );
+  };
+
+  mainApi.deleteMovie(savedUserMovie._id).then(() => {
+    const newUserMovieList = userMovieList.filter(
+      (userMovie) => userMovie.movieId !== movie.movieId,
+    );
+
+    setUserMovieList(newUserMovieList);
+    setUpdatedUserMovieList(userMovieList);
+    localStorage.setItem(
+      `${currentUser.email} - userMovies`,
+      JSON.stringify(newUserMovieList),
+    );
+  });
+
   useEffect(() => {
-    MoviesApi.getMovies().then((movies) => setMovieList(movies));
+    const jwt = localStorage.getItem('jwt');
+    if (jwt)
+      mainApi
+        .checkToken(jwt)
+        .then((res) => {
+          setIsLoggedIn(true);
+          setCurrentUser(res.data);
+          navigate('/movies');
+        })
+        .catch((err) => console.error(`Токен не соответствует: (${err})`));
   }, []);
+
+  useEffect(() => {
+    if (isLoggedIn)
+      mainApi
+        .getUserData()
+        .then((user) => setCurrentUser(user.data))
+        .catch((err) => console.error(`Что-то пошло не так: (${err})`));
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (isLoggedIn && currentUser)
+      mainApi
+        .getUserMovies()
+        .then((movies) => {
+          setUserMovieList(movies.filter((m) => m.owner === currentUser._id));
+        })
+        .catch((err) => console.error(`Что-то пошло не так: (${err})`));
+  }, [isLoggedIn, currentUser, updatedUserMovieList]);
 
   return (
     <div className="App">
       <div className="page">
-        {isloaded ? (
-          <CurrentUserContext.Provider value={currentUser}>
-            {handleElementRouteCheck(headerRoutesArr) && (
-              <Header
-                isLoggedIn={isLoggedIn}
-                isAccordionOpen={isAccordionOpen}
-                onClickAccordion={handleAccordionBtnClick}
-              />
-            )}
-            <Routes>
-              <Route element={<ProtectedRoutes isLoggedIn={isLoggedIn} />}>
-                <Route path="/movies" element={<Movies movies={movieList} />} />
-                {/* TODO saved movie list state var*/}
-                <Route
-                  path="/saved-movies"
-                  element={<SavedMovies movies={movieList} />}
-                />
-                <Route path="/profile" element={<Profile />} />
-              </Route>
-              <Route exact path="/" element={<Main />} />
-              <Route exact path="/signup" element={<Register />} />
-              <Route exact path="/signin" element={<Login />} />
+        <CurrentUserContext.Provider value={currentUser}>
+          {handleElementRouteCheck(headerRoutesArr) && (
+            <Header
+              isLoggedIn={isLoggedIn}
+              isAccordionOpen={isAccordionOpen}
+              onClickAccordion={handleAccordionBtnClick}
+            />
+          )}
+          <Routes>
+            <Route element={<ProtectedRoutes isLoggedIn={isLoggedIn} />}>
               <Route
-                path="/404"
-                element={<NotFound onGoBackBtnClick={handleNotFoundBtnClick} />}
+                path="/movies"
+                element={
+                  <Movies
+                    userMovieList={userMovieList}
+                    onBookmark={handleBookmarkMovie}
+                    onDelete={handleDeleteMovie}
+                  />
+                }
               />
-              <Route path="*" element={<Navigate to="/404" replace />} />
-            </Routes>
-            {handleElementRouteCheck(footerRoutesArr) && <Footer />}
-          </CurrentUserContext.Provider>
-        ) : (
-          <Preloader />
-        )}
+              <Route
+                path="/saved-movies"
+                element={
+                  <SavedMovies
+                    userMovieList={userMovieList}
+                    onDelete={handleDeleteMovie}
+                  />
+                }
+              />
+              <Route
+                path="/profile"
+                element={<Profile onSignOut={handleSignOut} />}
+              />
+            </Route>
+            <Route exact path="/" element={<Main />} />
+            <Route
+              exact
+              path="/signup"
+              element={<Register onRegister={handleRegisterSubmit} />}
+            />
+            <Route
+              exact
+              path="/signin"
+              element={<Login onLogin={handleLoginSubmit} />}
+            />
+            <Route
+              path="/404"
+              element={<NotFound onGoBackBtnClick={handleNotFoundBtnClick} />}
+            />
+            <Route path="*" element={<Navigate to="/404" replace />} />
+          </Routes>
+          {handleElementRouteCheck(footerRoutesArr) && <Footer />}
+        </CurrentUserContext.Provider>
       </div>
     </div>
   );
