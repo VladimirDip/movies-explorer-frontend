@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import {
   Navigate,
   Route,
@@ -11,7 +12,6 @@ import Header from '../Header/Header.component';
 import Main from '../Main/Main.component';
 import Footer from '../Footer/Footer.component';
 import Movies from '../Movies/Movies.component';
-import SavedMovies from '../SavedMovies/SavedMovies.component';
 import Profile from '../Profile/Profile.component';
 import Register from '../Register/Register.component';
 import Login from '../Login/Login.component';
@@ -19,23 +19,28 @@ import NotFound from '../NotFound/NotFound.component';
 import ProtectedRoutes from '../ProtectedRoutes/ProtectedRoutes.component';
 
 import { CurrentUserContext } from '../../contexts/CurrentUserContext';
+import { TOOLTIP_MESSAGES } from '../../utils/constants';
 
 import mainApi from '../../utils/MainApi';
 
 import './App.styles.css';
+import InfoTooltip from '../InfoTooltip/InfoTooltip.component';
+import SavedMovies from '../SavedMovies/SavedMovies.component';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Auth
   const [isAccordionOpen, setIsAccordionOpen] = useState(false); // Navbar menu
+  const [isInfoTooltip, setInfoTooltip] = useState({
+    isOpen: false,
+    isSucceeded: '',
+    message: '',
+  }); // Info tooltip config state
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [userMovieList, setUserMovieList] = useState([]); // Movies
-  const [updatedUserMovieList, setUpdatedUserMovieList] = useState([]);
+  const [updatedUserMovieList, setUpdatedUserMovieList] = useState([]); // update page after delete bookmark
 
   const [currentUser, setCurrentUser] = useState({});
-
-  // const [isShortMovies, setIsShortMovies] = useState(false);
-  // const [movieList, setMovieList] = useState([]);
-  // const [filtredMovieList, setFiltredMovieList] = useState([]);
 
   const headerRoutesArr = ['/', '/movies', '/saved-movies', '/profile'];
   const footerRoutesArr = ['/', '/movies', '/saved-movies'];
@@ -43,27 +48,98 @@ const App = () => {
   const navigate = useNavigate();
   const currentLocation = useLocation();
 
+  const handleGoBackClick = () => navigate('/');
   const handleAccordionBtnClick = () => setIsAccordionOpen(!isAccordionOpen);
-  const handleNotFoundBtnClick = () => navigate('/');
+
+  const handleInfoTooltipClose = () =>
+    setInfoTooltip({ ...isInfoTooltip, isOpen: false });
   const handleElementRouteCheck = (routesArr) =>
     routesArr.some((route) => route === currentLocation.pathname);
 
-  const handleLoginSubmit = (email, password) =>
+  const handleRegisterSubmit = ({ name, email, password }) =>
+    mainApi
+      .register(name, email, password)
+      .then((userData) => {
+        if (userData.email) {
+          setInfoTooltip({
+            isOpen: true,
+            isSucceeded: true,
+            message: TOOLTIP_MESSAGES.REGISTER,
+          });
+          handleLoginSubmit({ email, password });
+        }
+      })
+      .catch((err) => {
+        setInfoTooltip({
+          isOpen: true,
+          isSucceeded: false,
+          message: TOOLTIP_MESSAGES.ERROR.REGISTER_ERROR,
+        });
+        console.error(`Некорректно заполнено одно из полей: (${err})`);
+      })
+      .finally(() => setIsSubmitting(false));
+
+  const handleLoginSubmit = ({ email, password }) =>
     mainApi
       .login(email, password)
       .then((res) => {
-        localStorage.setItem('jwt', res.token);
         setIsLoggedIn(true);
         navigate('/movies');
+        setInfoTooltip({
+          isOpen: true,
+          isSucceeded: true,
+          message: TOOLTIP_MESSAGES.LOGIN,
+        });
       })
       .catch((err) => {
-        console.error(`Пользователь с email не найден : (${err})`);
+        setInfoTooltip({
+          isOpen: true,
+          isSucceeded: false,
+          message: TOOLTIP_MESSAGES.ERROR.LOGIN_ERROR,
+        });
+        console.error(`Пользователь с таким email не найден : (${err})`);
+      })
+      .finally(() => setIsSubmitting(false));
+
+  const handleSignOut = () =>
+    mainApi
+      .logout()
+      .then(() => {
+        setCurrentUser({});
+        setIsLoggedIn(false);
+        navigate('/');
+      })
+      .catch((err) => {
+        setInfoTooltip({
+          isOpen: true,
+          isSucceeded: false,
+          message: TOOLTIP_MESSAGES.ERROR.PROFILE_ERROR,
+        });
+        console.error(`'Что-то пошло не так! Попробуйте ещё раз.' ${err}`);
       });
 
-  const handleSignOut = () => {
-    localStorage.removeItem('jwt');
-    setIsLoggedIn(false);
-    navigate('/signin');
+  const handleProfileEdit = ({ name, email }) => {
+    setIsSubmitting(true);
+
+    mainApi
+      .patchUser(name, email)
+      .then((data) => {
+        setCurrentUser(data);
+        setInfoTooltip({
+          isOpen: true,
+          isSucceeded: true,
+          message: TOOLTIP_MESSAGES.PROFILE,
+        });
+      })
+      .catch((err) => {
+        setInfoTooltip({
+          isOpen: true,
+          isSucceeded: false,
+          message: TOOLTIP_MESSAGES.ERROR.PROFILE_ERROR,
+        });
+        console.error(`'Что-то пошло не так! Попробуйте ещё раз.' ${err}`);
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   const handleBookmarkMovie = (movie) => {
@@ -76,7 +152,7 @@ const App = () => {
       : mainApi
           .addMovie(movie)
           .then((newMovie) => setUserMovieList([...userMovieList, newMovie]))
-          .catch((err) => console.log(err)); // TODO
+          .catch((err) => console.log(err));
   };
 
   // Temp for get movies
@@ -85,32 +161,41 @@ const App = () => {
       (userMovie) =>
         userMovie.movieId === movie.id || userMovie.movieId === movie.movieId,
     );
+
+    mainApi
+      .deleteMovie(savedUserMovie._id)
+      .then(() => {
+        const newUserMovieList = userMovieList.filter(
+          (userMovie) => userMovie.movieId !== movie.movieId,
+        );
+
+        setUserMovieList(newUserMovieList);
+        setUpdatedUserMovieList(userMovieList);
+        localStorage.setItem(
+          `${currentUser.email} - userMovies`,
+          JSON.stringify(newUserMovieList),
+        );
+      })
+      .catch((err) => console.log(err));
   };
 
-  mainApi.deleteMovie(savedUserMovie._id).then(() => {
-    const newUserMovieList = userMovieList.filter(
-      (userMovie) => userMovie.movieId !== movie.movieId,
-    );
-
-    setUserMovieList(newUserMovieList);
-    setUpdatedUserMovieList(userMovieList);
-    localStorage.setItem(
-      `${currentUser.email} - userMovies`,
-      JSON.stringify(newUserMovieList),
-    );
-  });
-
   useEffect(() => {
-    const jwt = localStorage.getItem('jwt');
-    if (jwt)
-      mainApi
-        .checkToken(jwt)
-        .then((res) => {
+    // Update the document title using the browser API
+    mainApi
+      .checkToken()
+      .then((auth) => {
+        if (auth) {
           setIsLoggedIn(true);
-          setCurrentUser(res.data);
-          navigate('/movies');
-        })
-        .catch((err) => console.error(`Токен не соответствует: (${err})`));
+          navigate(currentLocation.pathname);
+        } else {
+          setIsLoggedIn(false);
+          navigate('/');
+        }
+      })
+      .catch(() =>
+        console.error(`Что-то пошло не так: 
+      `),
+      );
   }, []);
 
   useEffect(() => {
@@ -126,7 +211,9 @@ const App = () => {
       mainApi
         .getUserMovies()
         .then((movies) => {
-          setUserMovieList(movies.filter((m) => m.owner === currentUser._id));
+          setUserMovieList(
+            movies.filter((movie) => movie.owner === currentUser._id),
+          );
         })
         .catch((err) => console.error(`Что-то пошло не так: (${err})`));
   }, [isLoggedIn, currentUser, updatedUserMovieList]);
@@ -165,27 +252,54 @@ const App = () => {
               />
               <Route
                 path="/profile"
-                element={<Profile onSignOut={handleSignOut} />}
+                element={
+                  <Profile
+                    onSignOut={handleSignOut}
+                    onSubmit={handleProfileEdit}
+                    isSubmitting={isSubmitting}
+                  />
+                }
               />
             </Route>
             <Route exact path="/" element={<Main />} />
             <Route
-              exact
               path="/signup"
-              element={<Register onRegister={handleRegisterSubmit} />}
+              element={
+                isLoggedIn ? (
+                  <Navigate to="/" replace />
+                ) : (
+                  <Register
+                    onRegister={handleRegisterSubmit}
+                    isSubmitting={isSubmitting}
+                  />
+                )
+              }
             />
             <Route
               exact
               path="/signin"
-              element={<Login onLogin={handleLoginSubmit} />}
+              element={
+                isLoggedIn ? (
+                  <Navigate to="/" replace />
+                ) : (
+                  <Login
+                    onLogin={handleLoginSubmit}
+                    isSubmitting={isSubmitting}
+                  />
+                )
+              }
             />
             <Route
               path="/404"
-              element={<NotFound onGoBackBtnClick={handleNotFoundBtnClick} />}
+              element={<NotFound onClick={handleGoBackClick} />}
             />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
           {handleElementRouteCheck(footerRoutesArr) && <Footer />}
+          <InfoTooltip
+            configState={isInfoTooltip}
+            onClose={handleInfoTooltipClose}
+          />
         </CurrentUserContext.Provider>
       </div>
     </div>

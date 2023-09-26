@@ -18,14 +18,28 @@ const Navigation = ({ isLoggedIn, isAccordionOpen, onClickAccordion }) => {
           >
             {isAccordionOpen && (
               <li className="navigation__item">
-                <NavLink to="/" className="navigation__link ">
+                <NavLink
+                  className={({ isActive }) =>
+                    !isActive
+                      ? 'navigation__link navigation__link_active'
+                      : 'navigation__link'
+                  }
+                  to="/"
+                >
                   Главная
                 </NavLink>
               </li>
             )}
-            {/* TODO Remove hardcode active class*/}
-            <li className="navigation__item navigation__item_active">
-              <NavLink className="navigation__link" to="/movies">
+
+            <li className="navigation__item">
+              <NavLink
+                className={({ isActive }) =>
+                  isActive
+                    ? 'navigation__link navigation__link_active'
+                    : 'navigation__link'
+                }
+                to="/movies"
+              >
                 Фильмы
               </NavLink>
             </li>
@@ -34,13 +48,24 @@ const Navigation = ({ isLoggedIn, isAccordionOpen, onClickAccordion }) => {
                 isAccordionOpen ? `` : `navigation__item_center`
               }`}
             >
-              <NavLink className="navigation__link " to="/saved-movies">
+              <NavLink
+                className={({ isActive }) =>
+                  isActive
+                    ? 'navigation__link navigation__link_active'
+                    : 'navigation__link'
+                }
+                to="/saved-movies"
+              >
                 Сохранённые фильмы
               </NavLink>
             </li>
             <li className="navigation__item">
               <NavLink
-                className="navigation__link navigation__link_type_account"
+                className={({ isActive }) =>
+                  isActive
+                    ? 'navigation__link link navigation__link_type_account navigation__link_active'
+                    : 'navigation__link link navigation__link_type_account'
+                }
                 to="/profile"
               >
                 Аккаунт

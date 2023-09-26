@@ -52,7 +52,7 @@
 .register__labels-container {
   display: flex;
   flex-direction: column;
-  gap: 42px;
+  gap: 60px;
   width: 100%;
 }
 
@@ -192,7 +192,6 @@
   }
 
   .register__labels-container {
-    gap: 42px;
     margin-top: 40px;
   }
 

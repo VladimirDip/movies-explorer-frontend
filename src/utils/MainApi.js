@@ -40,13 +40,10 @@ class MainApi {
   }
 
   // Token check
-  checkToken(token) {
-    return fetch(`${this._options.BASE_URL}/users/me`, {
+  checkToken() {
+    return fetch(`${this._options.BASE_URL}/users/autologin`, {
       method: 'GET',
-      headers: {
-        ...this._options.headers,
-        Authorization: `Bearer ${token}`,
-      },
+      headers: this._options.headers,
       credentials: 'include',
     }).then(this._getResponse);
   }
@@ -54,6 +51,7 @@ class MainApi {
   // Get user data
   getUserData() {
     return fetch(`${this._options.BASE_URL}/users/me`, {
+      method: 'GET',
       headers: this._options.headers,
       credentials: 'include',
     }).then(this._getResponse);

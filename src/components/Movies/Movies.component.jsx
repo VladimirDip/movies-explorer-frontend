@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import MoviesCardList from '../MoviesCardList/MoviesCardList.component';
 import SearchForm from '../SearchForm/SearchForm.component';
 import Preloader from '../Preloader/Preloader.component';
@@ -8,7 +8,7 @@ import { CurrentUserContext } from '../../contexts/CurrentUserContext';
 import {
   filterMoviesSearch,
   filterShortMovies,
-  moviesImageLinkTransform,
+  transformMoviesData,
 } from '../../utils/utilities';
 import { ERROR_MESSAGES } from '../../utils/constants';
 
@@ -64,17 +64,21 @@ const Movies = ({ userMovieList, onBookmark, onDelete }) => {
       moviesApi
         .getMovies()
         .then((movies) => {
-          setLocalMovieList(movies);
+          setMovieList(movies);
           handleFilterMoviesSearch(
-            moviesImageLinkTransform(movies),
+            transformMoviesData(movies),
             inputValue,
             isShortMovies,
+          );
+          localStorage.setItem(
+            `${currentUser.email} - initialMovies`,
+            JSON.stringify(movies),
           );
         })
         .catch(() =>
           setIsErrorMessage({
             isShown: true,
-            ErrorMessage: ERROR_MESSAGES.NOT_AVAILABLE,
+            message: ERROR_MESSAGES.NOT_AVAILABLE,
           }),
         )
         .finally(() => setIsLoading(false));
@@ -84,6 +88,7 @@ const Movies = ({ userMovieList, onBookmark, onDelete }) => {
   };
 
   const handleShortMoviesCheckbox = () => {
+    console.log('thi act');
     setIsShortMovies(!isShortMovies);
     !isShortMovies
       ? setFiltredMovieList(filterShortMovies(localMovieList))
@@ -93,6 +98,13 @@ const Movies = ({ userMovieList, onBookmark, onDelete }) => {
       !isShortMovies,
     );
   };
+
+  useEffect(() => {
+    const initialMovies = JSON.parse(
+      localStorage.getItem(`${currentUser.email} - initialMovies`),
+    );
+    if (initialMovies) setMovieList(initialMovies);
+  }, []);
 
   useEffect(() => {
     localStorage.getItem(`${currentUser.email} - isShortMovies`) === 'true'
@@ -105,7 +117,7 @@ const Movies = ({ userMovieList, onBookmark, onDelete }) => {
       const movies = JSON.parse(
         localStorage.getItem(`${currentUser.email} - movies`),
       );
-      setMovieList(movies);
+      setLocalMovieList(movies);
       localStorage.getItem(`${currentUser.email} - isShortMovies`) === 'true'
         ? setFiltredMovieList(filterShortMovies(movies))
         : setFiltredMovieList(movies);
@@ -118,6 +130,7 @@ const Movies = ({ userMovieList, onBookmark, onDelete }) => {
         isShortMovies={isShortMovies}
         onSearch={handleSearchSubmit}
         onFilterCheckbox={handleShortMoviesCheckbox}
+        setIsErrorMessage={setIsErrorMessage}
       />
       {isLoading ? (
         <Preloader />

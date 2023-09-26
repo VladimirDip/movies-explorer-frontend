@@ -34,7 +34,7 @@
   text-shadow: 0 0 10px var(--color-back-main);
 }
 
-.navigation__item_active {
+.navigation__link_active {
   font-weight: 500;
 }
 
@@ -182,13 +182,17 @@
     font-weight: 500;
   }
 
-  .navigation__item_active:not(.navigation__link_type_account):after {
+  .navigation__link:hover:not(.navigation__link_type_account):after {
     content: '';
     border-bottom: 2px solid var(--color-font-main);
     width: 100%;
     position: relative;
     display: block;
     top: 3px;
+  }
+
+  .navigation__item_active:not(.navigation__link_type_account):after {
+    top: 7px;
   }
 
   .navigation__accordion-button {
@@ -254,9 +258,5 @@
     background-size: 32px 32px;
     height: 22px;
     width: 22px;
-  }
-
-  .navigation__item_active:not(.navigation__link_type_account):after {
-    top: 7px;
   }
 }

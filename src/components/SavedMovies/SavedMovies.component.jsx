@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import MoviesCardList from '../MoviesCardList/MoviesCardList.component';
 import SearchForm from '../SearchForm/SearchForm.component';
@@ -46,21 +46,54 @@ const SavedMovies = ({ userMovieList, onDelete }) => {
   };
 
   const handleShortMoviesCheckbox = () => {
-    setIsShortMovies(!isShortMovies);
-    !isShortMovies
-      ? setFiltredMovieList(filterShortMovies(localMovieList))
-      : setFiltredMovieList(localMovieList);
-    localStorage.setItem(
-      `${currentUser.email} - isShortMovies`,
-      !isShortMovies,
-    );
+    // console.log('thi act');
+    if (!isShortMovies) {
+      setIsShortMovies(true);
+      setLocalMovieList(filterShortMovies(filtredMovieList));
+      filterShortMovies(filtredMovieList).length === 0
+        ? setIsErrorMessage({
+            isShown: true,
+            message: ERROR_MESSAGES.NOT_FOUND,
+          })
+        : setIsErrorMessage({
+            isShown: false,
+            message: '',
+          });
+      localStorage.setItem(
+        `${currentUser.email} - isShortBookmarkedMovies`,
+        true,
+      );
+    } else {
+      setIsShortMovies(false);
+      setLocalMovieList(filtredMovieList);
+      filtredMovieList.length === 0
+        ? setIsErrorMessage({
+            isShown: true,
+            message: ERROR_MESSAGES.NOT_FOUND,
+          })
+        : setIsErrorMessage({
+            isShown: false,
+            message: '',
+          });
+      localStorage.setItem(
+        `${currentUser.email} - isShortBookmarkedMovies`,
+        false,
+      );
+    }
   };
 
   useEffect(() => {
-    localStorage.getItem(`${currentUser.email} - isShortMovies`) === 'true'
-      ? setIsShortMovies(true)
-      : setIsShortMovies(false);
-  }, [currentUser]);
+    if (
+      localStorage.getItem(`${currentUser.email} - isShortBookmarkedMovies`) ===
+      'true'
+    ) {
+      setIsShortMovies(true);
+      setLocalMovieList(filterShortMovies(userMovieList));
+    } else {
+      setIsShortMovies(false);
+      setLocalMovieList(userMovieList);
+    }
+  }, [currentUser, userMovieList]);
 
   useEffect(() => {
     setFiltredMovieList(userMovieList);
@@ -86,7 +119,7 @@ const SavedMovies = ({ userMovieList, onDelete }) => {
         <Preloader />
       ) : !isErrorMessage.isShown ? (
         <MoviesCardList
-          filtredMovieList={filtredMovieList}
+          filtredMovieList={localMovieList}
           userMovieList={userMovieList}
           onDelete={onDelete}
         />

@@ -1,26 +1,23 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useFormWithValidation } from '../../hooks/useFormWithValidation';
 
 import logo from '../../images/logo.svg';
 
 import './Register.styles.css';
 
-const Register = ({ onRegister }) => {
-  const [isValid, setIsValid] = useState(true); // TODO validation
-  const [values, setValues] = useState({});
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setValues((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+const Register = ({ onRegister, isSubmitting }) => {
+  const { values, handleChange, resetForm, errors, isValid } =
+    useFormWithValidation();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onRegister(values.name, values.email, values.password);
+    onRegister(values);
   };
+
+  useEffect(() => {
+    resetForm();
+  }, [resetForm]);
 
   return (
     <main className="register">
@@ -31,6 +28,7 @@ const Register = ({ onRegister }) => {
         <h1 className="register__title">Добро пожаловать!</h1>
       </div>
       <form
+        id="submit"
         className="register__form"
         name="register"
         noValidate
@@ -43,14 +41,14 @@ const Register = ({ onRegister }) => {
               name="name"
               className="register__input"
               onChange={handleChange}
-              value={values.name || ''}
+              value={values.name ?? ''}
               type="text"
               required
               minLength="2"
               maxLength="30"
               placeholder="Имя"
             />
-            <span className="register__error">все не так</span>
+            <span className="register__error">{errors.name ?? ''}</span>
           </label>
           <label className="register__label">
             <span className="register__label-text">E-mail</span>
@@ -58,12 +56,12 @@ const Register = ({ onRegister }) => {
               name="email"
               className="register__input"
               onChange={handleChange}
-              value={values.email || ''}
+              value={values.email ?? ''}
               type="email"
               required
               placeholder="E-mail"
             />
-            <span className="register__error">и тут не так</span>
+            <span className="register__error">{errors.email ?? ''}</span>
           </label>
           <label className="register__label">
             <span className="register__label-text">Пароль</span>
@@ -74,10 +72,11 @@ const Register = ({ onRegister }) => {
               value={values.password || ''}
               type="password"
               required
+              minLength="8"
+              maxLength="30"
               placeholder="Пароль"
             />
-            {/* TODO remove hardcode errors */}
-            <span className="register__error">Что-то пошло не так...</span>
+            <span className="register__error">{errors.password ?? ''}</span>
           </label>
         </div>
       </form>
@@ -86,7 +85,7 @@ const Register = ({ onRegister }) => {
           type="submit"
           form="submit"
           className="register__button"
-          disabled={!isValid}
+          disabled={!isValid || isSubmitting}
         >
           Зарегистрироваться
         </button>

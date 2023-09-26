@@ -1,26 +1,24 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+
+import { useFormWithValidation } from '../../hooks/useFormWithValidation';
 
 import logo from '../../images/logo.svg';
 
 import './Login.styles.css';
 
-const Login = ({ onLogin }) => {
-  const [isValid, setIsValid] = useState(true); // TODO validation
-  const [values, setValues] = useState({});
+const Login = ({ onLogin, isSubmitting }) => {
+  const { values, handleChange, resetForm, errors, isValid } =
+    useFormWithValidation();
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setValues((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      onLogin(values.email, values.password);
-    };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onLogin(values);
   };
+
+  useEffect(() => {
+    resetForm();
+  }, [resetForm]);
 
   return (
     <main className="login">
@@ -30,7 +28,12 @@ const Login = ({ onLogin }) => {
         </Link>
         <h1 className="login__title">Рады видеть!</h1>
       </div>
-      <form className="login__form" name="login" onSubmit={handleSubmit}>
+      <form
+        id="login"
+        className="login__form"
+        name="login"
+        onSubmit={handleSubmit}
+      >
         <div className="login__labels-container">
           <label className="login__label">
             <span className="login__label-text">E-mail</span>
@@ -38,12 +41,12 @@ const Login = ({ onLogin }) => {
               name="email"
               className="login__input"
               onChange={handleChange}
-              value={values.email || ''}
+              value={values.email ?? ''}
               type="email"
               required
               placeholder="E-mail"
             />
-            <span className="login__error"></span>
+            <span className="login__error">{errors.email ?? ''}</span>
           </label>
           <label className="login__label">
             <span className="login__label-text">Пароль</span>
@@ -51,12 +54,12 @@ const Login = ({ onLogin }) => {
               name="password"
               className="login__input"
               onChange={handleChange}
-              value={values.password || ''}
+              value={values.password ?? ''}
               type="password"
               required
               placeholder="Пароль"
             />
-            <span className="login__error"></span>
+            <span className="login__error">{errors.password ?? ''}</span>
           </label>
         </div>
       </form>
@@ -65,7 +68,7 @@ const Login = ({ onLogin }) => {
           type="submit"
           form="login"
           className="login__button"
-          disabled={!isValid}
+          disabled={!isValid || isSubmitting}
         >
           Войти
         </button>

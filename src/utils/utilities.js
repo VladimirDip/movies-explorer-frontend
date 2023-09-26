@@ -45,10 +45,24 @@ export const filterMoviesSearch = (
 export const findBookmarkedMovies = (userMoviesArr, movie) =>
   userMoviesArr.find((item) => item.movieId === movie.id);
 
-export const moviesImageLinkTransform = (moviesArr) => {
+export const transformMoviesData = (moviesArr) => {
   moviesArr.forEach((movie) => {
-    movie.thumbnail = `https://api.nomoreparties.co${movie.image.formats.thumbnail.url}`;
-    movie.image = `https://api.nomoreparties.co${movie.image.url}`;
+    if (!movie.nameEN) movie.nameEN = movie.nameRU;
+    if (!movie.country) movie.country = 'Russia';
+    if (
+      !movie.trailerLink ||
+      !movie.trailerLink.includes('https://www.youtube.com/')
+    )
+      movie.trailerLink = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+    if (!movie.image) {
+      movie.image =
+        'https://cs8.pikabu.ru/post_img/big/2016/03/27/7/1459078271127742859.jpg';
+      movie.thumbnail =
+        'https://cs8.pikabu.ru/post_img/big/2016/03/27/7/1459078271127742859.jpg';
+    } else {
+      movie.thumbnail = `https://api.nomoreparties.co${movie.image.formats.thumbnail.url}`;
+      movie.image = `https://api.nomoreparties.co${movie.image.url}`;
+    }
   });
   return moviesArr;
 };
