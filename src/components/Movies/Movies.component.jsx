@@ -88,7 +88,6 @@ const Movies = ({ userMovieList, onBookmark, onDelete }) => {
   };
 
   const handleShortMoviesCheckbox = () => {
-    console.log('thi act');
     setIsShortMovies(!isShortMovies);
     !isShortMovies
       ? setFiltredMovieList(filterShortMovies(localMovieList))
