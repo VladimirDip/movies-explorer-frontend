@@ -47,12 +47,13 @@ const App = () => {
 
   const navigate = useNavigate();
   const currentLocation = useLocation();
-
-  const handleGoBackClick = () => navigate('/');
+  const query = localStorage.getItem(`${currentUser.email} - movieSearch`);
+  const handleGoBackClick = () => navigate(-1);
   const handleAccordionBtnClick = () => setIsAccordionOpen(!isAccordionOpen);
 
   const handleInfoTooltipClose = () =>
     setInfoTooltip({ ...isInfoTooltip, isOpen: false });
+
   const handleElementRouteCheck = (routesArr) =>
     routesArr.some((route) => route === currentLocation.pathname);
 
@@ -105,6 +106,7 @@ const App = () => {
     mainApi
       .logout()
       .then(() => {
+        localStorage.clear();
         setCurrentUser({});
         setIsLoggedIn(false);
         navigate('/');
@@ -238,6 +240,7 @@ const App = () => {
                     userMovieList={userMovieList}
                     onBookmark={handleBookmarkMovie}
                     onDelete={handleDeleteMovie}
+                    moviesSearch={query}
                   />
                 }
               />

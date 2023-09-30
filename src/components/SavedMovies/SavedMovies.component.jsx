@@ -28,6 +28,7 @@ const SavedMovies = ({ userMovieList, onDelete }) => {
   const handleSearchSubmit = (inputValue) => {
     setIsErrorMessage({ isShown: false, message: '' });
     setIsLoading(true);
+    localStorage.setItem(`${currentUser.email} - movieLocalSearch`, inputValue);
 
     const moviesToRender = filterMoviesSearch(
       userMovieList,
@@ -41,12 +42,21 @@ const SavedMovies = ({ userMovieList, onDelete }) => {
       setIsErrorMessage({ isShown: false, ErrorMessage: '' });
       setFiltredMovieList(moviesToRender);
       setLocalMovieList(moviesToRender);
+      localStorage.setItem(
+        `${currentUser.email} - savedSearchMovies`,
+        JSON.stringify(moviesToRender),
+      );
+      if (isShortMovies) {
+        const localMovies = JSON.parse(
+          localStorage.getItem(`${currentUser.email} - savedSearchMovies`),
+        );
+        setLocalMovieList(filterShortMovies(localMovies));
+      }
     }
     setIsLoading(false);
   };
 
   const handleShortMoviesCheckbox = () => {
-    // console.log('thi act');
     if (!isShortMovies) {
       setIsShortMovies(true);
       setLocalMovieList(filterShortMovies(filtredMovieList));
@@ -89,14 +99,12 @@ const SavedMovies = ({ userMovieList, onDelete }) => {
     ) {
       setIsShortMovies(true);
       setLocalMovieList(filterShortMovies(userMovieList));
+      setFiltredMovieList(userMovieList);
     } else {
       setIsShortMovies(false);
       setLocalMovieList(userMovieList);
+      setFiltredMovieList(userMovieList);
     }
-  }, [currentUser, userMovieList]);
-
-  useEffect(() => {
-    setFiltredMovieList(userMovieList);
     userMovieList.length === 0
       ? setIsErrorMessage({
           isShown: true,
@@ -106,7 +114,30 @@ const SavedMovies = ({ userMovieList, onDelete }) => {
           isShown: false,
           message: '',
         });
-  }, [userMovieList]);
+  }, [currentUser, userMovieList]);
+
+  useEffect(() => {
+    if (
+      localStorage.getItem(`${currentUser.email} - movieLocalSearch`) &&
+      localStorage.getItem(`${currentUser.email} - isShortBookmarkedMovies`) ===
+        'true' &&
+      localStorage.getItem(`${currentUser.email} - movieLocalSearch`)
+    ) {
+      const qui = localStorage.getItem(
+        `${currentUser.email} - movieLocalSearch`,
+      );
+
+      const moviesToRender = filterMoviesSearch(
+        userMovieList,
+        qui,
+        isShortMovies,
+      );
+
+      setIsShortMovies(true);
+      setLocalMovieList(filterShortMovies(moviesToRender));
+      setFiltredMovieList(moviesToRender);
+    }
+  }, [currentUser, userMovieList]);
 
   return (
     <main className="movies">
@@ -122,6 +153,7 @@ const SavedMovies = ({ userMovieList, onDelete }) => {
           filtredMovieList={localMovieList}
           userMovieList={userMovieList}
           onDelete={onDelete}
+          isShortMovies={isShortMovies}
         />
       ) : (
         <ErrorMessage message={isErrorMessage.message} />

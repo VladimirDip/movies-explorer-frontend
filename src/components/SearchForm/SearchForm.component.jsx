@@ -13,6 +13,7 @@ const SearchForm = ({
   onSearch,
   onFilterCheckbox,
   setIsErrorMessage,
+  moviesSearch,
 }) => {
   const currentUser = useContext(CurrentUserContext);
   const currentLocation = useLocation();
@@ -33,15 +34,14 @@ const SearchForm = ({
       );
     }
   }, [currentUser]);
-
   useEffect(() => {
-    if (currentLocation.pathname === '/movies' && !values.search)
+    if (currentLocation.pathname === '/movies' && moviesSearch === undefined)
       setIsErrorMessage({
         isShown: true,
         message: ERROR_MESSAGES.EMPTY_INPUT,
       });
-  }, [values, currentUser.email, currentLocation.pathname]);
-  // console.log(isShortMovies);
+  }, [values, currentUser.email, currentLocation.pathname, moviesSearch]);
+
   return (
     <section className="search">
       <div className="search__container">

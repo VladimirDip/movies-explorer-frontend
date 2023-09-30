@@ -37,9 +37,10 @@ export const filterMoviesSearch = (
     );
   });
 
-  return isShortMoviesCheckbox
-    ? filterShortMovies(filtredMoviesArr)
-    : filtredMoviesArr;
+  // return isShortMoviesCheckbox
+  //   ? filterShortMovies(filtredMoviesArr)
+  //   : filtredMoviesArr;
+  return filtredMoviesArr;
 };
 
 export const findBookmarkedMovies = (userMoviesArr, movie) =>

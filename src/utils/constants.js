@@ -1,5 +1,5 @@
-export const BASE_URL = 'https://api-diploma-dip.nomoredomainsicu.ru';
-// export const BASE_URL = 'http://localhost:3001';
+// export const BASE_URL = 'https://api-diploma-dip.nomoredomainsicu.ru';
+export const BASE_URL = 'http://localhost:3001';
 export const MOVIE_API_URL = 'https://api.nomoreparties.co/beatfilm-movies';
 export const SHORT_MOVIE_DURATION = 40;
 
@@ -28,8 +28,15 @@ export const DEVICE_SCREEN_SETTINGS = {
       add: 4,
     },
   },
+  medium: {
+    minWidth: 1023,
+    cards: {
+      total: 12,
+      add: 3,
+    },
+  },
   tablet: {
-    minWidth: 768,
+    minWidth: 630,
     cards: {
       total: 8,
       add: 2,

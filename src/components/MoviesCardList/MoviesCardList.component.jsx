@@ -13,8 +13,9 @@ const MoviesCardList = ({
   userMovieList,
   onBookmark,
   onDelete,
+  isShortMovies,
 }) => {
-  const { desktop, tablet, phone } = DEVICE_SCREEN_SETTINGS;
+  const { desktop, medium, tablet, phone } = DEVICE_SCREEN_SETTINGS;
   const [cardDisplayOptions, setCardDisplayOptions] = useState(desktop.cards);
   const [moviesToDisplay, setMoviesToDisplay] = useState([]);
   const currentLocation = useLocation();
@@ -37,16 +38,18 @@ const MoviesCardList = ({
     setMoviesToDisplay(
       filtredMovieList?.filter((_, index) => index < cardDisplayOptions.total),
     );
-  }, [filtredMovieList, cardDisplayOptions.total]);
-
+  }, [filtredMovieList, cardDisplayOptions.total, isShortMovies]);
+  // console.log(moviesToDisplay);
   useEffect(() => {
     if (currentLocation.pathname === '/movies') {
       if (widthSize >= desktop.minWidth) setCardDisplayOptions(desktop.cards);
-      if (widthSize < desktop.minWidth && widthSize >= tablet.minWidth)
+      else if (widthSize < desktop.minWidth && widthSize >= medium.minWidth)
+        setCardDisplayOptions(medium.cards);
+      else if (widthSize < desktop.minWidth && widthSize >= tablet.minWidth)
         setCardDisplayOptions(tablet.cards);
-      if (widthSize < tablet.minWidth) setCardDisplayOptions(phone.cards);
+      else if (widthSize < tablet.minWidth) setCardDisplayOptions(phone.cards);
     }
-  }, [widthSize, desktop, tablet, phone, currentLocation.pathname]);
+  }, [widthSize, desktop, tablet, phone, medium, currentLocation.pathname]);
 
   return (
     <section className="movies-card-list">
@@ -61,7 +64,8 @@ const MoviesCardList = ({
           />
         ))}
       </ul>
-      {currentLocation.pathname === '/movies' &&
+      {(currentLocation.pathname === '/movies' ||
+        currentLocation.pathname === '/saved-movies') &&
         moviesToDisplay.length < filtredMovieList.length &&
         moviesToDisplay.length >= phone.cards.total && (
           <button

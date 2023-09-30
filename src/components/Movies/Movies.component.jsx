@@ -15,7 +15,7 @@ import { ERROR_MESSAGES } from '../../utils/constants';
 import moviesApi from '../../utils/MoviesApi';
 import './Movies.styles.css';
 
-const Movies = ({ userMovieList, onBookmark, onDelete }) => {
+const Movies = ({ userMovieList, onBookmark, onDelete, moviesSearch }) => {
   const [isLoading, setIsLoading] = useState(false); // Preloader
   const [isShortMovies, setIsShortMovies] = useState(false); // Short movies checkbox
   const [isErrorMessage, setIsErrorMessage] = useState({
@@ -109,6 +109,7 @@ const Movies = ({ userMovieList, onBookmark, onDelete }) => {
     localStorage.getItem(`${currentUser.email} - isShortMovies`) === 'true'
       ? setIsShortMovies(true)
       : setIsShortMovies(false);
+    // console.log('up');
   }, [currentUser]);
 
   useEffect(() => {
@@ -117,11 +118,12 @@ const Movies = ({ userMovieList, onBookmark, onDelete }) => {
         localStorage.getItem(`${currentUser.email} - movies`),
       );
       setLocalMovieList(movies);
+
       localStorage.getItem(`${currentUser.email} - isShortMovies`) === 'true'
         ? setFiltredMovieList(filterShortMovies(movies))
         : setFiltredMovieList(movies);
     }
-  }, [currentUser, userMovieList]);
+  }, [currentUser, userMovieList, isShortMovies]);
 
   return (
     <main className="movies">
@@ -130,6 +132,7 @@ const Movies = ({ userMovieList, onBookmark, onDelete }) => {
         onSearch={handleSearchSubmit}
         onFilterCheckbox={handleShortMoviesCheckbox}
         setIsErrorMessage={setIsErrorMessage}
+        moviesSearch={moviesSearch}
       />
       {isLoading ? (
         <Preloader />
