@@ -7,3 +7,5 @@ https://diploma-dip.nomoredomainsicu.ru/
 
 бекэнд доступен по ссылке:
 https://api-diploma-dip.nomoredomainsicu.ru/
+
+https://github.com/VladimirDip/movies-explorer-frontend/pull/3
